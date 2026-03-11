@@ -1,79 +1,155 @@
 .shell {
   display: flex;
   justify-content: center;
-  padding: 56px 20px 72px;
+  padding: 56px 20px 80px;
 }
 
-.panel {
-  width: min(100%, 760px);
-  border: 1px solid rgba(31, 41, 55, 0.08);
-  border-radius: 28px;
-  padding: 32px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.96)),
-    #ffffff;
-  box-shadow: 0 28px 80px rgba(15, 23, 42, 0.12);
-  backdrop-filter: blur(16px);
-}
-
-.hero {
+.frame {
+  width: min(100%, 1560px);
   display: grid;
-  gap: 10px;
-  margin-bottom: 28px;
+  gap: 28px;
+}
+
+.heroPanel {
+  display: grid;
+  gap: 14px;
+  padding: 32px;
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  border-radius: 28px;
+  background: rgba(255, 252, 247, 0.74);
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(18px);
 }
 
 .eyebrow {
-  color: #b45309;
+  color: #9a640f;
   font-size: 0.82rem;
   font-weight: 700;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 
 .title {
-  color: #111827;
-  font-size: clamp(2.4rem, 6vw, 4rem);
-  line-height: 0.95;
+  max-width: 18ch;
+  color: #1f2937;
+  font-size: clamp(2.5rem, 5vw, 4.4rem);
+  line-height: 0.96;
+  letter-spacing: -0.05em;
 }
 
-.description {
-  max-width: 54ch;
+.description,
+.note {
+  max-width: 70ch;
   color: #4b5563;
   font-size: 1rem;
-  line-height: 1.6;
+  line-height: 1.7;
+}
+
+.note {
+  font-size: 0.95rem;
+}
+
+.comparisonGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 22px;
+  align-items: start;
+}
+
+.themeCard {
+  display: grid;
+  gap: 20px;
+  padding: 24px;
+  border: 1px solid var(--theme-border);
+  border-radius: 28px;
+  color: var(--theme-text);
+  background:
+    radial-gradient(circle at top right, var(--theme-glow), transparent 34%),
+    linear-gradient(180deg, var(--theme-surface-strong), var(--theme-surface));
+  box-shadow: 0 24px 56px var(--theme-shadow);
+}
+
+.cardHeader {
+  display: grid;
+  gap: 12px;
+}
+
+.headerCopy {
+  display: grid;
+  gap: 6px;
+}
+
+.cardEyebrow {
+  color: var(--theme-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.cardTitle {
+  color: var(--theme-text);
+  font-size: clamp(1.75rem, 3vw, 2.25rem);
+  line-height: 0.96;
+}
+
+.cardDescription {
+  color: var(--theme-muted);
+  font-size: 0.95rem;
+  line-height: 1.65;
+}
+
+.swatchRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.swatchChip {
+  padding: 8px 12px;
+  border-radius: 999px;
+  color: var(--theme-chip-text);
+  background: var(--theme-chip-bg);
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  font-size: 0.78rem;
+  font-weight: 600;
+  backdrop-filter: blur(10px);
 }
 
 .form {
   display: grid;
-  gap: 12px;
-  margin-bottom: 24px;
+  gap: 10px;
 }
 
 .label {
-  color: #111827;
-  font-size: 0.95rem;
+  color: var(--theme-text);
+  font-size: 0.92rem;
   font-weight: 600;
 }
 
 .inputRow {
   display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
 }
 
 .input {
   min-width: 0;
-  border: 1px solid rgba(148, 163, 184, 0.65);
+  border: 1px solid var(--theme-input-border);
   border-radius: 16px;
   padding: 14px 16px;
-  color: #111827;
-  background: rgba(255, 255, 255, 0.9);
+  color: var(--theme-text);
+  background: var(--theme-input);
   font: inherit;
 }
 
+.input::placeholder {
+  color: var(--theme-muted);
+}
+
 .input:focus {
-  outline: 3px solid rgba(251, 191, 36, 0.25);
-  border-color: #d97706;
+  outline: 3px solid var(--theme-input-focus);
+  border-color: var(--theme-accent-strong);
 }
 
 .addButton,
@@ -81,142 +157,157 @@
 .deleteButton {
   border: none;
   border-radius: 16px;
-  padding: 14px 18px;
+  padding: 14px 16px;
   font: inherit;
   font-weight: 600;
   cursor: pointer;
   transition:
     transform 160ms ease,
     box-shadow 160ms ease,
-    opacity 160ms ease;
+    opacity 160ms ease,
+    filter 160ms ease;
 }
 
 .addButton:hover,
 .toggleButton:hover,
 .deleteButton:hover {
   transform: translateY(-1px);
+  filter: saturate(1.05);
+}
+
+.addButton:disabled,
+.toggleButton:disabled,
+.deleteButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+  transform: none;
+  filter: none;
 }
 
 .addButton {
-  color: #fffdf7;
-  background: linear-gradient(135deg, #f59e0b, #ea580c);
-  box-shadow: 0 16px 32px rgba(234, 88, 12, 0.25);
+  color: var(--theme-accent-contrast);
+  background: linear-gradient(135deg, var(--theme-accent), var(--theme-accent-strong));
+  box-shadow: 0 16px 28px color-mix(in srgb, var(--theme-accent-strong) 22%, transparent);
 }
 
 .summary {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-  margin-bottom: 24px;
+  gap: 10px;
 }
 
 .summaryItem {
-  border-radius: 20px;
-  padding: 16px;
-  background: linear-gradient(180deg, rgba(255, 247, 237, 0.9), rgba(255, 255, 255, 0.9));
-  border: 1px solid rgba(251, 191, 36, 0.2);
+  border-radius: 18px;
+  padding: 14px;
+  background: var(--theme-summary);
+  border: 1px solid var(--theme-summary-border);
 }
 
 .summaryValue {
   display: block;
-  color: #111827;
-  font-size: 1.5rem;
+  color: var(--theme-text);
+  font-size: 1.35rem;
   font-weight: 700;
 }
 
 .summaryLabel {
   display: block;
   margin-top: 4px;
-  color: #6b7280;
-  font-size: 0.9rem;
+  color: var(--theme-muted);
+  font-size: 0.85rem;
 }
 
 .listSection {
   display: grid;
-  gap: 16px;
+  gap: 14px;
 }
 
 .listHeader {
   display: flex;
-  justify-content: space-between;
-  gap: 12px;
   align-items: end;
+  justify-content: space-between;
+  gap: 10px;
 }
 
 .listTitle {
-  color: #111827;
-  font-size: 1.15rem;
+  color: var(--theme-text);
+  font-size: 1rem;
 }
 
 .listHint {
-  color: #6b7280;
-  font-size: 0.92rem;
+  color: var(--theme-muted);
+  font-size: 0.82rem;
+  text-align: right;
 }
 
 .taskList {
   display: grid;
-  gap: 12px;
+  gap: 10px;
   list-style: none;
 }
 
 .taskItem {
-  display: flex;
-  justify-content: space-between;
-  gap: 18px;
-  align-items: center;
-  border: 1px solid rgba(148, 163, 184, 0.18);
+  display: grid;
+  gap: 14px;
+  padding: 16px;
   border-radius: 20px;
-  padding: 18px;
-  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--theme-task-border);
+  background: var(--theme-task);
 }
 
 .taskTitle {
-  color: #111827;
-  font-size: 1rem;
+  color: var(--theme-text);
+  font-size: 0.98rem;
   font-weight: 600;
+  line-height: 1.5;
 }
 
 .taskTitleCompleted {
-  color: #6b7280;
+  color: var(--theme-muted);
   text-decoration: line-through;
 }
 
 .taskMeta {
-  margin-top: 6px;
-  color: #6b7280;
-  font-size: 0.86rem;
+  margin-top: 4px;
+  color: var(--theme-muted);
+  font-size: 0.82rem;
 }
 
 .actions {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: wrap;
-  justify-content: flex-end;
 }
 
 .toggleButton {
-  color: #14532d;
-  background: #dcfce7;
+  color: var(--theme-success-text);
+  background: var(--theme-success-bg);
 }
 
 .deleteButton {
-  color: #991b1b;
-  background: #fee2e2;
+  color: var(--theme-danger-text);
+  background: var(--theme-danger-bg);
 }
 
-.emptyState {
-  border: 1px dashed rgba(148, 163, 184, 0.5);
-  border-radius: 24px;
-  padding: 32px 20px;
-  text-align: center;
-  color: #4b5563;
-  background: rgba(255, 255, 255, 0.72);
+@media (max-width: 1460px) {
+  .comparisonGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
-@media (max-width: 720px) {
-  .panel {
-    padding: 24px;
+@media (max-width: 820px) {
+  .shell {
+    padding: 32px 16px 48px;
+  }
+
+  .heroPanel,
+  .themeCard {
+    padding: 20px;
     border-radius: 24px;
+  }
+
+  .comparisonGrid {
+    grid-template-columns: 1fr;
   }
 
   .inputRow,
@@ -224,18 +315,23 @@
     grid-template-columns: 1fr;
   }
 
-  .listHeader,
-  .taskItem {
+  .listHeader {
     display: grid;
+    align-items: start;
   }
 
-  .actions {
-    justify-content: stretch;
+  .listHint {
+    text-align: left;
   }
 
   .addButton,
   .toggleButton,
   .deleteButton {
     width: 100%;
+  }
+
+  .actions {
+    display: grid;
+    grid-template-columns: 1fr;
   }
 }

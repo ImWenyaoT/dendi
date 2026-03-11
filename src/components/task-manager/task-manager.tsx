@@ -7,8 +7,6 @@ import {
   useSyncExternalStore,
 } from 'react'
 
-import type { Task } from '@/types/task'
-
 import { useTheme } from '@/components/theme-provider/theme-provider'
 import type { ColorScheme, ThemeId } from '@/components/theme-provider/theme-store'
 

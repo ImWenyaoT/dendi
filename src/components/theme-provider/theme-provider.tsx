@@ -1,6 +1,6 @@
 'use client'
 
-import { useLayoutEffect, useSyncExternalStore } from 'react'
+import { useEffect, useLayoutEffect, useSyncExternalStore } from 'react'
 
 import {
   type ColorScheme,
@@ -11,6 +11,15 @@ import {
   saveThemePreference,
   subscribeToThemeStore,
 } from './theme-store'
+
+/**
+ * Isomorphic layout effect: uses useLayoutEffect in the browser (where
+ * window is defined) to avoid a flash of the wrong theme, and falls back
+ * to useEffect in server-side rendering environments so React does not warn
+ * about "useLayoutEffect does nothing on the server".
+ */
+const useIsomorphicLayoutEffect =
+  typeof window !== 'undefined' ? useLayoutEffect : useEffect
 
 /**
  * Resolves the effective mode ('light' | 'dark') from the preference
@@ -45,7 +54,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     getServerThemeSnapshot,
   )
 
-  useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const mql = window.matchMedia('(prefers-color-scheme: dark)')
 
     function sync() {

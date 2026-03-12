@@ -89,7 +89,8 @@ test('subscribeToThemeStore updates snapshot on storage key changes', () => {
     }),
   )
 
-  const unsubscribe = subscribeToThemeStore(() => {})
+  let callCount = 0
+  const unsubscribe = subscribeToThemeStore(() => { callCount++ })
 
   const updatedRaw = JSON.stringify({
     themeId: 'winter-green',
@@ -101,6 +102,7 @@ test('subscribeToThemeStore updates snapshot on storage key changes', () => {
     newValue: updatedRaw,
   } as StorageEvent)
 
+  assert.equal(callCount, 1, 'subscriber callback should be called once after key update')
   assert.deepEqual(getThemeSnapshot(), {
     themeId: 'winter-green',
     colorScheme: 'dark',
@@ -120,7 +122,8 @@ test('subscribeToThemeStore resets snapshot after localStorage.clear()', () => {
     }),
   )
 
-  const unsubscribe = subscribeToThemeStore(() => {})
+  let callCount = 0
+  const unsubscribe = subscribeToThemeStore(() => { callCount++ })
 
   getThemeSnapshot()
   setStorageValue(null)
@@ -129,6 +132,7 @@ test('subscribeToThemeStore resets snapshot after localStorage.clear()', () => {
     newValue: null,
   } as StorageEvent)
 
+  assert.equal(callCount, 1, 'subscriber callback should be called once after localStorage.clear()')
   assert.deepEqual(getThemeSnapshot(), {
     themeId: 'cloud-dancer',
     colorScheme: 'system',

@@ -340,6 +340,16 @@
 
 /* ─── Responsive ─── */
 
+@media (prefers-reduced-motion: reduce) {
+  .settingsOverlay {
+    animation: none;
+  }
+
+  .settingsPanel {
+    animation: none;
+  }
+}
+
 @media (max-width: 640px) {
   .shell {
     padding: 32px 16px 48px;

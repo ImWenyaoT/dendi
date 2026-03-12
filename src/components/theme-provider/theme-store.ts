@@ -86,8 +86,9 @@ export function getServerThemeSnapshot(): ThemePreference {
  * Persists new preference and notifies all subscribers.
  */
 export function saveThemePreference(next: ThemePreference) {
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
-  cachedRawValue = JSON.stringify(next)
+  const serialized = JSON.stringify(next)
+  window.localStorage.setItem(STORAGE_KEY, serialized)
+  cachedRawValue = serialized
   cachedSnapshot = next
   listeners.forEach((fn) => fn())
 }

@@ -2,7 +2,9 @@
 
 import {
   type FormEvent,
+  useEffect,
   useId,
+  useRef,
   useState,
   useSyncExternalStore,
 } from 'react'
@@ -43,26 +45,45 @@ function formatTaskDate(createdAt: string) {
 /**
  * Renders the settings panel for theme and color scheme selection.
  */
-function SettingsPanel({
-  isOpen,
-  onClose,
-}: {
-  isOpen: boolean
-  onClose: () => void
-}) {
+function SettingsPanel({ onClose }: { onClose: () => void }) {
   const { themeId, colorScheme, setThemeId, setColorScheme } = useTheme()
+  const panelRef = useRef<HTMLElement>(null)
+  const previousFocusRef = useRef<HTMLElement | null>(null)
 
-  if (!isOpen) {
-    return null
-  }
+  useEffect(() => {
+    // Store the previously focused element
+    previousFocusRef.current = document.activeElement as HTMLElement
+
+    // Move focus into the panel
+    panelRef.current?.focus()
+
+    // Handle Escape key to close the panel
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        onClose()
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+
+      // Restore focus to the previously focused element
+      previousFocusRef.current?.focus()
+    }
+  }, [onClose])
 
   return (
     <div className={styles.settingsOverlay} onClick={onClose}>
       <aside
+        ref={panelRef}
         className={styles.settingsPanel}
         onClick={(e) => e.stopPropagation()}
         role="dialog"
+        aria-modal="true"
         aria-label="Settings"
+        tabIndex={-1}
       >
         <div className={styles.settingsHeader}>
           <h2 className={styles.settingsTitle}>Settings</h2>
@@ -269,10 +290,9 @@ export function TaskManager() {
         )}
       </div>
 
-      <SettingsPanel
-        isOpen={settingsOpen}
-        onClose={() => setSettingsOpen(false)}
-      />
+      {settingsOpen && (
+        <SettingsPanel onClose={() => setSettingsOpen(false)} />
+      )}
     </section>
   )
 }

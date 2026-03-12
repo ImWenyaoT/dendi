@@ -18,7 +18,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang='en' data-theme='cloud-dancer' data-color-scheme='light' suppressHydrationWarning>
+    <html lang='en' data-theme='cloud-dancer' data-color-scheme='light'>
       <body>
         <ThemeProvider>{children}</ThemeProvider>
       </body>

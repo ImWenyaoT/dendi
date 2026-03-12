@@ -8,7 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --test --experimental-strip-types src/components/task-manager/task-store.test.ts"
+    "test": "tsx --test src/components/task-manager/task-store.test.ts src/components/theme-provider/theme-store.test.ts"
   },
   "dependencies": {
     "next": "16.1.6",
@@ -21,6 +21,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
+    "tsx": "^4.21.0",
     "typescript": "^5"
   }
 }

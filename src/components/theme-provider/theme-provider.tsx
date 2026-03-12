@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useSyncExternalStore } from 'react'
+import { useLayoutEffect, useSyncExternalStore } from 'react'
 
 import {
   type ColorScheme,
@@ -45,7 +45,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     getServerThemeSnapshot,
   )
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const mql = window.matchMedia('(prefers-color-scheme: dark)')
 
     function sync() {

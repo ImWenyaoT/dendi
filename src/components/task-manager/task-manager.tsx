@@ -1,6 +1,7 @@
 'use client'
 
 import {
+  useCallback,
   type FormEvent,
   useEffect,
   useId,
@@ -61,6 +62,47 @@ function SettingsPanel({ onClose }: { onClose: () => void }) {
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') {
         onClose()
+        return
+      }
+
+      if (event.key !== 'Tab') {
+        return
+      }
+
+      const focusableElements = panelRef.current?.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+      )
+
+      if (!focusableElements || focusableElements.length === 0) {
+        event.preventDefault()
+        panelRef.current?.focus()
+        return
+      }
+
+      const focusTargets = Array.from(focusableElements)
+      const firstTarget = focusTargets[0]
+      const lastTarget = focusTargets[focusTargets.length - 1]
+      const activeElement = document.activeElement as HTMLElement | null
+
+      if (event.shiftKey) {
+        if (
+          !activeElement ||
+          activeElement === firstTarget ||
+          !panelRef.current?.contains(activeElement)
+        ) {
+          event.preventDefault()
+          lastTarget.focus()
+        }
+        return
+      }
+
+      if (
+        !activeElement ||
+        activeElement === lastTarget ||
+        !panelRef.current?.contains(activeElement)
+      ) {
+        event.preventDefault()
+        firstTarget.focus()
       }
     }
 
@@ -184,6 +226,7 @@ export function TaskManager() {
   const totalCount = tasks.length
   const completedCount = tasks.filter((t) => t.completed).length
   const remainingCount = totalCount - completedCount
+  const handleCloseSettings = useCallback(() => setSettingsOpen(false), [])
 
   return (
     <section className={styles.shell}>
@@ -291,7 +334,7 @@ export function TaskManager() {
       </div>
 
       {settingsOpen && (
-        <SettingsPanel onClose={() => setSettingsOpen(false)} />
+        <SettingsPanel onClose={handleCloseSettings} />
       )}
     </section>
   )

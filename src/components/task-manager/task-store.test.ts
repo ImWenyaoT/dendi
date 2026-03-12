@@ -100,9 +100,9 @@ test('subscribeToTaskStore reacts when another tab clears localStorage', () => {
 })
 
 /**
- * Verifies the task manager source defines four Pantone demo themes side by side.
+ * Verifies the task manager source defines the dual-theme system with settings panel.
  */
-test('task manager includes four Pantone comparison themes', () => {
+test('task manager includes dual-theme system with settings panel', () => {
   const taskManagerSource = readFileSync(
     new URL('./task-manager.tsx', import.meta.url),
     'utf8',
@@ -113,11 +113,9 @@ test('task manager includes four Pantone comparison themes', () => {
   )
 
   assert.match(taskManagerSource, /Cloud Dancer/)
-  assert.match(taskManagerSource, /Mocha Mousse/)
-  assert.match(taskManagerSource, /Rose Dust/)
   assert.match(taskManagerSource, /Winter Green/)
-  assert.doesNotMatch(taskManagerSource, /id: 'classic-blue'/)
-  assert.match(taskManagerSource, /comparisonGrid/)
-  assert.match(taskManagerStyles, /\.comparisonGrid/)
-  assert.match(taskManagerStyles, /\.themeCard/)
+  assert.match(taskManagerSource, /settingsOpen/)
+  assert.match(taskManagerSource, /SettingsPanel/)
+  assert.match(taskManagerStyles, /\.settingsPanel/)
+  assert.match(taskManagerStyles, /\.settingsOverlay/)
 })

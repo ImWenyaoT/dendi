@@ -1,8 +1,11 @@
 'use client'
 
 import {
+  useCallback,
   type FormEvent,
+  useEffect,
   useId,
+  useRef,
   useState,
   useSyncExternalStore,
 } from 'react'
@@ -43,26 +46,86 @@ function formatTaskDate(createdAt: string) {
 /**
  * Renders the settings panel for theme and color scheme selection.
  */
-function SettingsPanel({
-  isOpen,
-  onClose,
-}: {
-  isOpen: boolean
-  onClose: () => void
-}) {
+function SettingsPanel({ onClose }: { onClose: () => void }) {
   const { themeId, colorScheme, setThemeId, setColorScheme } = useTheme()
+  const panelRef = useRef<HTMLElement>(null)
+  const previousFocusRef = useRef<HTMLElement | null>(null)
 
-  if (!isOpen) {
-    return null
-  }
+  useEffect(() => {
+    // Store the previously focused element
+    previousFocusRef.current = document.activeElement as HTMLElement
+
+    // Move focus into the panel
+    panelRef.current?.focus()
+
+    // Handle Escape key to close the panel
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        onClose()
+        return
+      }
+
+      if (event.key !== 'Tab') {
+        return
+      }
+
+      const focusableElements = panelRef.current?.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+      )
+
+      if (!focusableElements || focusableElements.length === 0) {
+        event.preventDefault()
+        panelRef.current?.focus()
+        return
+      }
+
+      const focusTargets = Array.from(focusableElements)
+      const firstTarget = focusTargets[0]
+      const lastTarget = focusTargets[focusTargets.length - 1]
+      const activeElement = document.activeElement as HTMLElement | null
+
+      if (event.shiftKey) {
+        if (
+          !activeElement ||
+          activeElement === firstTarget ||
+          !panelRef.current?.contains(activeElement)
+        ) {
+          event.preventDefault()
+          lastTarget.focus()
+        }
+        return
+      }
+
+      if (
+        !activeElement ||
+        activeElement === lastTarget ||
+        !panelRef.current?.contains(activeElement)
+      ) {
+        event.preventDefault()
+        firstTarget.focus()
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+
+      // Restore focus to the previously focused element
+      previousFocusRef.current?.focus()
+    }
+  }, [onClose])
 
   return (
     <div className={styles.settingsOverlay} onClick={onClose}>
       <aside
+        ref={panelRef}
         className={styles.settingsPanel}
         onClick={(e) => e.stopPropagation()}
         role="dialog"
+        aria-modal="true"
         aria-label="Settings"
+        tabIndex={-1}
       >
         <div className={styles.settingsHeader}>
           <h2 className={styles.settingsTitle}>Settings</h2>
@@ -163,6 +226,7 @@ export function TaskManager() {
   const totalCount = tasks.length
   const completedCount = tasks.filter((t) => t.completed).length
   const remainingCount = totalCount - completedCount
+  const handleCloseSettings = useCallback(() => setSettingsOpen(false), [])
 
   return (
     <section className={styles.shell}>
@@ -269,10 +333,9 @@ export function TaskManager() {
         )}
       </div>
 
-      <SettingsPanel
-        isOpen={settingsOpen}
-        onClose={() => setSettingsOpen(false)}
-      />
+      {settingsOpen && (
+        <SettingsPanel onClose={handleCloseSettings} />
+      )}
     </section>
   )
 }

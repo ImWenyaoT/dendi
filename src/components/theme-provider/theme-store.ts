@@ -99,9 +99,17 @@ export function saveThemePreference(next: ThemePreference) {
 export function subscribeToThemeStore(onStoreChange: () => void) {
   listeners.add(onStoreChange)
 
+  /**
+   * Handles cross-tab storage updates for both key-specific changes and clear().
+   */
   function handleStorage(event: StorageEvent) {
-    if (event.key === STORAGE_KEY || event.key === null) {
+    if (event.key === STORAGE_KEY) {
+      cachedRawValue = event.newValue
+      cachedSnapshot = parsePreference(event.newValue)
+      onStoreChange()
+    } else if (event.key === null) {
       cachedRawValue = null
+      cachedSnapshot = DEFAULT_PREFERENCE
       onStoreChange()
     }
   }

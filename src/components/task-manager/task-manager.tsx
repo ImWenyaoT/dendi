@@ -1,6 +1,14 @@
 'use client'
 
-import { type FormEvent, useState, useSyncExternalStore } from 'react'
+import {
+  type FormEvent,
+  useId,
+  useState,
+  useSyncExternalStore,
+} from 'react'
+
+import { useTheme } from '@/components/theme-provider/theme-provider'
+import type { ColorScheme, ThemeId } from '@/components/theme-provider/theme-store'
 
 import styles from './task-manager.module.css'
 import {
@@ -11,20 +19,122 @@ import {
   subscribeToTaskStore,
 } from './task-store'
 
+const THEME_OPTIONS: { id: ThemeId; label: string; description: string }[] = [
+  { id: 'cloud-dancer', label: 'Cloud Dancer', description: '云雾中性色' },
+  { id: 'winter-green', label: 'Winter Green', description: '冬绿工作流' },
+]
+
+const COLOR_SCHEME_OPTIONS: { id: ColorScheme; label: string }[] = [
+  { id: 'system', label: 'Sync with system' },
+  { id: 'light', label: 'Light' },
+  { id: 'dark', label: 'Dark' },
+]
+
 /**
- * Renders the task manager UI and keeps tasks synced with localStorage.
+ * Formats a stored timestamp into a compact date label.
+ */
+function formatTaskDate(createdAt: string) {
+  return new Date(createdAt).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+  })
+}
+
+/**
+ * Renders the settings panel for theme and color scheme selection.
+ */
+function SettingsPanel({
+  isOpen,
+  onClose,
+}: {
+  isOpen: boolean
+  onClose: () => void
+}) {
+  const { themeId, colorScheme, setThemeId, setColorScheme } = useTheme()
+
+  if (!isOpen) {
+    return null
+  }
+
+  return (
+    <div className={styles.settingsOverlay} onClick={onClose}>
+      <aside
+        className={styles.settingsPanel}
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-label="Settings"
+      >
+        <div className={styles.settingsHeader}>
+          <h2 className={styles.settingsTitle}>Settings</h2>
+          <button
+            className={styles.settingsClose}
+            type="button"
+            onClick={onClose}
+            aria-label="Close settings"
+          >
+            ✕
+          </button>
+        </div>
+
+        <fieldset className={styles.settingsGroup}>
+          <legend className={styles.settingsLabel}>Theme</legend>
+          <div className={styles.optionList}>
+            {THEME_OPTIONS.map((option) => (
+              <button
+                key={option.id}
+                type="button"
+                className={
+                  option.id === themeId
+                    ? `${styles.optionButton} ${styles.optionButtonActive}`
+                    : styles.optionButton
+                }
+                onClick={() => setThemeId(option.id)}
+              >
+                <span className={styles.optionName}>{option.label}</span>
+                <span className={styles.optionDesc}>{option.description}</span>
+              </button>
+            ))}
+          </div>
+        </fieldset>
+
+        <fieldset className={styles.settingsGroup}>
+          <legend className={styles.settingsLabel}>Appearance</legend>
+          <div className={styles.optionList}>
+            {COLOR_SCHEME_OPTIONS.map((option) => (
+              <button
+                key={option.id}
+                type="button"
+                className={
+                  option.id === colorScheme
+                    ? `${styles.optionButton} ${styles.optionButtonActive}`
+                    : styles.optionButton
+                }
+                onClick={() => setColorScheme(option.id)}
+              >
+                <span className={styles.optionName}>{option.label}</span>
+              </button>
+            ))}
+          </div>
+        </fieldset>
+      </aside>
+    </div>
+  )
+}
+
+/**
+ * Main task manager with theme settings.
  */
 export function TaskManager() {
   const [draftTitle, setDraftTitle] = useState('')
+  const [settingsOpen, setSettingsOpen] = useState(false)
+  const inputId = useId()
+
   const tasks = useSyncExternalStore(
     subscribeToTaskStore,
     getTaskSnapshot,
     getServerTaskSnapshot,
   )
 
-  /**
-   * Adds a new task when the form is submitted with non-empty input.
-   */
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
@@ -38,9 +148,6 @@ export function TaskManager() {
     setDraftTitle('')
   }
 
-  /**
-   * Flips the completion state for a single task item.
-   */
   function handleToggleTask(taskId: string) {
     saveTasks(
       tasks.map((task) =>
@@ -49,113 +156,123 @@ export function TaskManager() {
     )
   }
 
-  /**
-   * Removes a task from the current list.
-   */
   function handleDeleteTask(taskId: string) {
     saveTasks(tasks.filter((task) => task.id !== taskId))
   }
 
-  const completedTaskCount = tasks.filter((task) => task.completed).length
-  const remainingTaskCount = tasks.length - completedTaskCount
+  const totalCount = tasks.length
+  const completedCount = tasks.filter((t) => t.completed).length
+  const remainingCount = totalCount - completedCount
 
   return (
     <section className={styles.shell}>
-      <div className={styles.panel}>
-        <div className={styles.hero}>
-          <p className={styles.eyebrow}>Next.js + TypeScript</p>
-          <h1 className={styles.title}>Task Manager</h1>
-          <p className={styles.description}>
-            Add tasks, mark them as done, and keep your list saved after refresh.
-          </p>
-        </div>
+      <div className={styles.frame}>
+        <header className={styles.header}>
+          <div className={styles.headerContent}>
+            <h1 className={styles.title}>Task Manager</h1>
+            <p className={styles.subtitle}>Manage your tasks with ease.</p>
+          </div>
+          <button
+            className={styles.settingsButton}
+            type="button"
+            onClick={() => setSettingsOpen(true)}
+            aria-label="Open settings"
+          >
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <path
+                d="M10 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z"
+                stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+              />
+              <path
+                d="M16.17 12.5a1.39 1.39 0 0 0 .28 1.53l.05.05a1.69 1.69 0 1 1-2.39 2.39l-.05-.05a1.39 1.39 0 0 0-1.53-.28 1.39 1.39 0 0 0-.84 1.27v.14a1.69 1.69 0 1 1-3.38 0v-.07a1.39 1.39 0 0 0-.91-1.27 1.39 1.39 0 0 0-1.53.28l-.05.05a1.69 1.69 0 1 1-2.39-2.39l.05-.05a1.39 1.39 0 0 0 .28-1.53 1.39 1.39 0 0 0-1.27-.84h-.14a1.69 1.69 0 0 1 0-3.38h.07a1.39 1.39 0 0 0 1.27-.91 1.39 1.39 0 0 0-.28-1.53l-.05-.05a1.69 1.69 0 1 1 2.39-2.39l.05.05a1.39 1.39 0 0 0 1.53.28h.07a1.39 1.39 0 0 0 .84-1.27v-.14a1.69 1.69 0 1 1 3.38 0v.07a1.39 1.39 0 0 0 .84 1.27 1.39 1.39 0 0 0 1.53-.28l.05-.05a1.69 1.69 0 1 1 2.39 2.39l-.05.05a1.39 1.39 0 0 0-.28 1.53v.07a1.39 1.39 0 0 0 1.27.84h.14a1.69 1.69 0 0 1 0 3.38h-.07a1.39 1.39 0 0 0-1.27.84Z"
+                stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+        </header>
 
         <form className={styles.form} onSubmit={handleSubmit}>
-          <label className={styles.label} htmlFor='task-title'>
+          <label className={styles.label} htmlFor={inputId}>
             New task
           </label>
           <div className={styles.inputRow}>
             <input
-              id='task-title'
+              id={inputId}
               className={styles.input}
-              type='text'
+              type="text"
               value={draftTitle}
-              onChange={(event) => setDraftTitle(event.target.value)}
-              placeholder='For example: Review the Next.js tutorial'
+              onChange={(e) => setDraftTitle(e.target.value)}
+              placeholder="What needs to be done?"
             />
-            <button className={styles.addButton} type='submit'>
+            <button className={styles.addButton} type="submit">
               Add task
             </button>
           </div>
         </form>
 
-        <div className={styles.summary} aria-label='Task summary'>
-          <div className={styles.summaryItem}>
-            <span className={styles.summaryValue}>{tasks.length}</span>
-            <span className={styles.summaryLabel}>Total</span>
-          </div>
-          <div className={styles.summaryItem}>
-            <span className={styles.summaryValue}>{remainingTaskCount}</span>
-            <span className={styles.summaryLabel}>Remaining</span>
-          </div>
-          <div className={styles.summaryItem}>
-            <span className={styles.summaryValue}>{completedTaskCount}</span>
-            <span className={styles.summaryLabel}>Completed</span>
-          </div>
-        </div>
-
-        <div className={styles.listSection}>
-          <div className={styles.listHeader}>
-            <h2 className={styles.listTitle}>Your tasks</h2>
-            <p className={styles.listHint}>Click complete to toggle progress.</p>
-          </div>
-
-          {tasks.length === 0 ? (
-            <div className={styles.emptyState}>
-              <h3>No tasks yet</h3>
-              <p>Create your first task to see it appear here.</p>
+        {totalCount > 0 && (
+          <div className={styles.summary}>
+            <div className={styles.summaryItem}>
+              <span className={styles.summaryValue}>{totalCount}</span>
+              <span className={styles.summaryLabel}>Total</span>
             </div>
-          ) : (
-            <ul className={styles.taskList}>
-              {tasks.map((task) => (
-                <li className={styles.taskItem} key={task.id}>
-                  <div>
-                    <p
-                      className={
-                        task.completed
-                          ? `${styles.taskTitle} ${styles.taskTitleCompleted}`
-                          : styles.taskTitle
-                      }
-                    >
-                      {task.title}
-                    </p>
-                    <p className={styles.taskMeta}>
-                      Created {new Date(task.createdAt).toLocaleDateString()}
-                    </p>
-                  </div>
+            <div className={styles.summaryItem}>
+              <span className={styles.summaryValue}>{remainingCount}</span>
+              <span className={styles.summaryLabel}>Remaining</span>
+            </div>
+            <div className={styles.summaryItem}>
+              <span className={styles.summaryValue}>{completedCount}</span>
+              <span className={styles.summaryLabel}>Completed</span>
+            </div>
+          </div>
+        )}
 
-                  <div className={styles.actions}>
-                    <button
-                      className={styles.toggleButton}
-                      type='button'
-                      onClick={() => handleToggleTask(task.id)}
-                    >
-                      {task.completed ? 'Mark active' : 'Mark done'}
-                    </button>
-                    <button
-                      className={styles.deleteButton}
-                      type='button'
-                      onClick={() => handleDeleteTask(task.id)}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+        {totalCount === 0 ? (
+          <p className={styles.emptyHint}>No tasks yet — add one above to get started.</p>
+        ) : (
+          <ul className={styles.taskList}>
+            {tasks.map((task) => (
+              <li className={styles.taskItem} key={task.id}>
+                <div>
+                  <p
+                    className={
+                      task.completed
+                        ? `${styles.taskTitle} ${styles.taskTitleCompleted}`
+                        : styles.taskTitle
+                    }
+                  >
+                    {task.title}
+                  </p>
+                  <p className={styles.taskMeta}>
+                    Created {formatTaskDate(task.createdAt)}
+                  </p>
+                </div>
+                <div className={styles.actions}>
+                  <button
+                    className={styles.toggleButton}
+                    type="button"
+                    onClick={() => handleToggleTask(task.id)}
+                  >
+                    {task.completed ? 'Mark active' : 'Mark done'}
+                  </button>
+                  <button
+                    className={styles.deleteButton}
+                    type="button"
+                    onClick={() => handleDeleteTask(task.id)}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
+
+      <SettingsPanel
+        isOpen={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+      />
     </section>
   )
 }

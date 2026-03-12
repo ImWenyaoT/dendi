@@ -1,8 +1,4 @@
-:root {
-  --background: #f7f1e6;
-  --foreground: #111827;
-  --surface: rgba(255, 255, 255, 0.88);
-}
+@import '../components/theme-provider/theme-tokens.css';
 
 html,
 body {
@@ -11,10 +7,10 @@ body {
 }
 
 body {
-  color: var(--foreground);
+  color: var(--theme-text);
   background:
-    radial-gradient(circle at top, rgba(251, 191, 36, 0.22), transparent 32%),
-    linear-gradient(180deg, #fff8ef 0%, var(--background) 52%, #efe5d1 100%);
+    radial-gradient(circle at top, var(--page-glow), transparent 32%),
+    var(--page-bg-gradient);
   font-family:
     'Avenir Next',
     'Segoe UI',
@@ -24,6 +20,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
+  transition: background-color 300ms ease, color 300ms ease;
 }
 
 * {
@@ -47,5 +44,5 @@ button {
 }
 
 ::selection {
-  background: rgba(245, 158, 11, 0.24);
+  background: color-mix(in srgb, var(--theme-accent) 24%, transparent);
 }

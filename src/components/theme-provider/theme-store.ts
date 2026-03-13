@@ -35,15 +35,14 @@ export function applyManualModeSelection(
 }
 
 /**
- * Updates the sync flag and, when enabling sync, immediately aligns to the current system mode.
+ * Updates the sync flag without altering the stored manual mode selection.
  */
 export function applySyncPreference(
   preference: ThemePreference,
   syncWithSystem: boolean,
-  systemMode: ManualMode,
 ): ThemePreference {
   return {
-    manualMode: syncWithSystem ? systemMode : preference.manualMode,
+    ...preference,
     syncWithSystem,
   }
 }

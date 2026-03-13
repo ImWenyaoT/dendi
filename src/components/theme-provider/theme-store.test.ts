@@ -101,9 +101,9 @@ test('applyManualModeSelection updates the displayed mode without disabling sync
 })
 
 /**
- * Verifies enabling sync immediately aligns the displayed mode to the current system mode.
+ * Verifies enabling sync preserves the stored manual mode without overwriting it.
  */
-test('applySyncPreference aligns the current mode to the system when sync is enabled', () => {
+test('applySyncPreference preserves manualMode when sync is enabled', () => {
   assert.deepEqual(
     applySyncPreference(
       {
@@ -111,10 +111,9 @@ test('applySyncPreference aligns the current mode to the system when sync is ena
         syncWithSystem: false,
       },
       true,
-      'dark',
     ),
     {
-      manualMode: 'dark',
+      manualMode: 'light',
       syncWithSystem: true,
     },
   )

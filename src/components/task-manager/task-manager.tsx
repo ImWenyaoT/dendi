@@ -141,11 +141,16 @@ function SettingsPanel({ onClose }: { onClose: () => void }) {
                 key={option.id}
                 type="button"
                 className={
-                  option.id === manualMode
+                  option.id === manualMode && !syncWithSystem
                     ? `${styles.optionButton} ${styles.optionButtonActive}`
                     : styles.optionButton
                 }
-                onClick={() => setManualMode(option.id)}
+                onClick={() => {
+                  if (syncWithSystem) {
+                    setSyncWithSystem(false)
+                  }
+                  setManualMode(option.id)
+                }}
               >
                 <span className={styles.optionName}>{option.label}</span>
                 <span className={styles.optionDesc}>{option.description}</span>
@@ -157,8 +162,8 @@ function SettingsPanel({ onClose }: { onClose: () => void }) {
         <button
           className={
             syncWithSystem
-              ? `${styles.toggleButton} ${styles.toggleButtonActive}`
-              : styles.toggleButton
+              ? `${styles.syncToggleButton} ${styles.syncToggleButtonActive}`
+              : styles.syncToggleButton
           }
           type='button'
           role='switch'

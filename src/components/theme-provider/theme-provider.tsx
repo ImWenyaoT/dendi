@@ -5,7 +5,6 @@ import { useEffect, useLayoutEffect, useSyncExternalStore } from 'react'
 import {
   applyManualModeSelection,
   applySyncPreference,
-  applySystemModeChange,
   type ManualMode,
   type ThemePreference,
   getServerThemeSnapshot,
@@ -41,6 +40,8 @@ function applyThemeToDocument(mode: 'light' | 'dark') {
 
 /**
  * Keeps the document theme in sync with stored preferences and the OS color scheme.
+ * When syncWithSystem is true, the effective mode is derived from the OS and the document
+ * is updated on media-query changes without persisting to localStorage.
  */
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const preference = useSyncExternalStore(
@@ -49,10 +50,17 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     getServerThemeSnapshot,
   )
 
+  // Apply effective mode immediately whenever preferences change.
   useIsomorphicLayoutEffect(() => {
-    applyThemeToDocument(preference.manualMode)
-  }, [preference.manualMode])
+    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+    const effectiveMode = preference.syncWithSystem
+      ? getSystemMode(systemPrefersDark)
+      : preference.manualMode
+    applyThemeToDocument(effectiveMode)
+  }, [preference.syncWithSystem, preference.manualMode])
 
+  // While sync is enabled, update the document whenever the OS mode changes
+  // without touching stored preferences.
   useEffect(() => {
     if (!preference.syncWithSystem) {
       return
@@ -60,22 +68,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
     const mql = window.matchMedia('(prefers-color-scheme: dark)')
 
-    function syncToSystem(systemPrefersDark: boolean) {
-      const nextPreference = applySystemModeChange(
-        getThemeSnapshot(),
-        getSystemMode(systemPrefersDark),
-      )
-
-      if (nextPreference !== getThemeSnapshot()) {
-        saveThemePreference(nextPreference)
-      }
-    }
-
     function handleChange(event: MediaQueryListEvent) {
-      syncToSystem(event.matches)
+      applyThemeToDocument(getSystemMode(event.matches))
     }
 
-    syncToSystem(mql.matches)
     mql.addEventListener('change', handleChange)
 
     return () => {
@@ -101,13 +97,7 @@ export function useTheme() {
   }
 
   function setSyncWithSystem(syncWithSystem: boolean) {
-    saveThemePreference(
-      applySyncPreference(
-        getThemeSnapshot(),
-        syncWithSystem,
-        getSystemMode(window.matchMedia('(prefers-color-scheme: dark)').matches),
-      ),
-    )
+    saveThemePreference(applySyncPreference(getThemeSnapshot(), syncWithSystem))
   }
 
   function setPreference(next: ThemePreference) {

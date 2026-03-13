@@ -11,7 +11,7 @@ import {
 } from 'react'
 
 import { useTheme } from '@/components/theme-provider/theme-provider'
-import type { ColorScheme, ThemeId } from '@/components/theme-provider/theme-store'
+import type { ManualMode } from '@/components/theme-provider/theme-store'
 
 import styles from './task-manager.module.css'
 import {
@@ -22,15 +22,9 @@ import {
   subscribeToTaskStore,
 } from './task-store'
 
-const THEME_OPTIONS: { id: ThemeId; label: string; description: string }[] = [
-  { id: 'cloud-dancer', label: 'Cloud Dancer', description: '云雾中性色' },
-  { id: 'winter-green', label: 'Winter Green', description: '冬绿工作流' },
-]
-
-const COLOR_SCHEME_OPTIONS: { id: ColorScheme; label: string }[] = [
-  { id: 'system', label: 'Sync with system' },
-  { id: 'light', label: 'Light' },
-  { id: 'dark', label: 'Dark' },
+const MANUAL_MODE_OPTIONS: { id: ManualMode; label: string; description: string }[] = [
+  { id: 'light', label: 'Cloud Dancer Light', description: '昼间的云雾纸感' },
+  { id: 'dark', label: 'Cloud Dancer Dark', description: '夜间的雾蓝界面' },
 ]
 
 /**
@@ -44,10 +38,10 @@ function formatTaskDate(createdAt: string) {
 }
 
 /**
- * Renders the settings panel for theme and color scheme selection.
+ * Renders the settings panel for Cloud Dancer appearance selection.
  */
 function SettingsPanel({ onClose }: { onClose: () => void }) {
-  const { themeId, colorScheme, setThemeId, setColorScheme } = useTheme()
+  const { manualMode, syncWithSystem, setManualMode, setSyncWithSystem } = useTheme()
   const panelRef = useRef<HTMLElement>(null)
   const previousFocusRef = useRef<HTMLElement | null>(null)
 
@@ -140,18 +134,18 @@ function SettingsPanel({ onClose }: { onClose: () => void }) {
         </div>
 
         <fieldset className={styles.settingsGroup}>
-          <legend className={styles.settingsLabel}>Theme</legend>
+          <legend className={styles.settingsLabel}>Appearance</legend>
           <div className={styles.optionList}>
-            {THEME_OPTIONS.map((option) => (
+            {MANUAL_MODE_OPTIONS.map((option) => (
               <button
                 key={option.id}
                 type="button"
                 className={
-                  option.id === themeId
+                  option.id === manualMode
                     ? `${styles.optionButton} ${styles.optionButtonActive}`
                     : styles.optionButton
                 }
-                onClick={() => setThemeId(option.id)}
+                onClick={() => setManualMode(option.id)}
               >
                 <span className={styles.optionName}>{option.label}</span>
                 <span className={styles.optionDesc}>{option.description}</span>
@@ -160,25 +154,27 @@ function SettingsPanel({ onClose }: { onClose: () => void }) {
           </div>
         </fieldset>
 
-        <fieldset className={styles.settingsGroup}>
-          <legend className={styles.settingsLabel}>Appearance</legend>
-          <div className={styles.optionList}>
-            {COLOR_SCHEME_OPTIONS.map((option) => (
-              <button
-                key={option.id}
-                type="button"
-                className={
-                  option.id === colorScheme
-                    ? `${styles.optionButton} ${styles.optionButtonActive}`
-                    : styles.optionButton
-                }
-                onClick={() => setColorScheme(option.id)}
-              >
-                <span className={styles.optionName}>{option.label}</span>
-              </button>
-            ))}
-          </div>
-        </fieldset>
+        <button
+          className={
+            syncWithSystem
+              ? `${styles.toggleButton} ${styles.toggleButtonActive}`
+              : styles.toggleButton
+          }
+          type='button'
+          role='switch'
+          aria-checked={syncWithSystem}
+          onClick={() => setSyncWithSystem(!syncWithSystem)}
+        >
+          <span className={styles.toggleMeta}>
+            <span className={styles.toggleTitle}>Sync with system</span>
+            <span className={styles.toggleHint}>
+              跟随设备外观，同时保留你手动选择的 Cloud Dancer 模式
+            </span>
+          </span>
+          <span className={styles.switchTrack} aria-hidden='true'>
+            <span className={styles.switchThumb} />
+          </span>
+        </button>
       </aside>
     </div>
   )

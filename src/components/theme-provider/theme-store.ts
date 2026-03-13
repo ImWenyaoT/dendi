@@ -1,21 +1,19 @@
 /**
- * Persists and broadcasts the user's theme and color-scheme preferences via localStorage.
+ * Persists and broadcasts the user's Cloud Dancer appearance preferences via localStorage.
  */
 
-export type ThemeId = 'cloud-dancer' | 'winter-green'
-
-export type ColorScheme = 'light' | 'dark' | 'system'
+export type ManualMode = 'light' | 'dark'
 
 export type ThemePreference = {
-  themeId: ThemeId
-  colorScheme: ColorScheme
+  manualMode: ManualMode
+  syncWithSystem: boolean
 }
 
 const STORAGE_KEY = 'dendi.theme-preference'
 
 const DEFAULT_PREFERENCE: ThemePreference = {
-  themeId: 'cloud-dancer',
-  colorScheme: 'system',
+  manualMode: 'light',
+  syncWithSystem: true,
 }
 
 const listeners = new Set<() => void>()
@@ -24,9 +22,76 @@ let cachedRawValue: string | null = null
 let cachedSnapshot: ThemePreference = DEFAULT_PREFERENCE
 
 /**
- * Validates a parsed value against the expected preference shape.
+ * Applies an explicit light/dark selection without altering the sync flag.
+ */
+export function applyManualModeSelection(
+  preference: ThemePreference,
+  manualMode: ManualMode,
+): ThemePreference {
+  return {
+    ...preference,
+    manualMode,
+  }
+}
+
+/**
+ * Updates the sync flag and, when enabling sync, immediately aligns to the current system mode.
+ */
+export function applySyncPreference(
+  preference: ThemePreference,
+  syncWithSystem: boolean,
+  systemMode: ManualMode,
+): ThemePreference {
+  return {
+    manualMode: syncWithSystem ? systemMode : preference.manualMode,
+    syncWithSystem,
+  }
+}
+
+/**
+ * Applies a system light/dark change only while sync remains enabled.
+ */
+export function applySystemModeChange(
+  preference: ThemePreference,
+  systemMode: ManualMode,
+): ThemePreference {
+  if (!preference.syncWithSystem || preference.manualMode === systemMode) {
+    return preference
+  }
+
+  return {
+    ...preference,
+    manualMode: systemMode,
+  }
+}
+
+/**
+ * Validates manual light/dark mode values.
+ */
+function isManualMode(value: unknown): value is ManualMode {
+  return value === 'light' || value === 'dark'
+}
+
+/**
+ * Validates a parsed value against the current preference shape.
  */
 function isThemePreference(value: unknown): value is ThemePreference {
+  if (typeof value !== 'object' || value === null) {
+    return false
+  }
+
+  const candidate = value as Record<string, unknown>
+
+  return isManualMode(candidate.manualMode) && typeof candidate.syncWithSystem === 'boolean'
+}
+
+/**
+ * Validates the legacy dual-theme preference shape so stored data upgrades cleanly.
+ */
+function isLegacyThemePreference(value: unknown): value is {
+  themeId: 'cloud-dancer' | 'winter-green'
+  colorScheme: 'light' | 'dark' | 'system'
+} {
   if (typeof value !== 'object' || value === null) {
     return false
   }
@@ -40,6 +105,24 @@ function isThemePreference(value: unknown): value is ThemePreference {
 }
 
 /**
+ * Normalizes current and legacy preference payloads to the current schema.
+ */
+function normalizePreference(value: unknown): ThemePreference {
+  if (isThemePreference(value)) {
+    return value
+  }
+
+  if (isLegacyThemePreference(value)) {
+    return {
+      manualMode: value.colorScheme === 'dark' ? 'dark' : 'light',
+      syncWithSystem: value.colorScheme === 'system',
+    }
+  }
+
+  return DEFAULT_PREFERENCE
+}
+
+/**
  * Safely parses the stored preference string.
  */
 function parsePreference(rawValue: string | null): ThemePreference {
@@ -49,7 +132,7 @@ function parsePreference(rawValue: string | null): ThemePreference {
 
   try {
     const parsed = JSON.parse(rawValue)
-    return isThemePreference(parsed) ? parsed : DEFAULT_PREFERENCE
+    return normalizePreference(parsed)
   } catch {
     return DEFAULT_PREFERENCE
   }

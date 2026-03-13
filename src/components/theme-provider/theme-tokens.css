@@ -29,87 +29,29 @@
 
 /* ─── Cloud Dancer – Dark ─── */
 [data-theme='cloud-dancer'][data-color-scheme='dark'] {
-  --theme-glow: rgba(100, 130, 126, 0.22);
-  --theme-surface: #1c2127;
-  --theme-surface-strong: #232a32;
-  --theme-border: rgba(140, 155, 165, 0.16);
-  --theme-shadow: rgba(0, 0, 0, 0.32);
-  --theme-text: #d6dde3;
-  --theme-muted: #8a9aaa;
-  --theme-accent: #6aada5;
-  --theme-accent-strong: #5b94c0;
-  --theme-accent-contrast: #111920;
-  --theme-input: rgba(30, 38, 48, 0.88);
-  --theme-input-border: rgba(100, 118, 130, 0.44);
-  --theme-input-focus: rgba(90, 148, 192, 0.28);
-  --theme-summary: rgba(28, 36, 44, 0.88);
-  --theme-summary-border: rgba(100, 130, 126, 0.22);
-  --theme-task: rgba(30, 38, 48, 0.72);
-  --theme-task-border: rgba(120, 140, 155, 0.18);
-  --theme-success-bg: rgba(42, 80, 66, 0.48);
-  --theme-success-text: #81c8a8;
-  --theme-danger-bg: rgba(110, 54, 38, 0.38);
-  --theme-danger-text: #e8a08e;
+  --theme-glow: rgba(154, 173, 175, 0.2);
+  --theme-surface: #364049;
+  --theme-surface-strong: #424c56;
+  --theme-border: rgba(171, 183, 190, 0.18);
+  --theme-shadow: rgba(0, 0, 0, 0.24);
+  --theme-text: #e6edf1;
+  --theme-muted: #b4bfc6;
+  --theme-accent: #a3bcc0;
+  --theme-accent-strong: #98afc4;
+  --theme-accent-contrast: #1d2830;
+  --theme-input: rgba(60, 71, 81, 0.84);
+  --theme-input-border: rgba(145, 158, 168, 0.36);
+  --theme-input-focus: rgba(152, 175, 196, 0.24);
+  --theme-summary: rgba(54, 64, 74, 0.9);
+  --theme-summary-border: rgba(150, 166, 168, 0.22);
+  --theme-task: rgba(57, 68, 78, 0.8);
+  --theme-task-border: rgba(150, 162, 170, 0.2);
+  --theme-success-bg: rgba(84, 110, 98, 0.34);
+  --theme-success-text: #b6cdc0;
+  --theme-danger-bg: rgba(129, 95, 79, 0.28);
+  --theme-danger-text: #e1bcac;
 
-  --page-bg: #14191e;
-  --page-bg-gradient: linear-gradient(180deg, #1a2028 0%, #14191e 52%, #10151a 100%);
-  --page-glow: rgba(100, 130, 126, 0.1);
-}
-
-/* ─── Winter Green – Light ─── */
-[data-theme='winter-green'][data-color-scheme='light'] {
-  --theme-glow: rgba(122, 174, 167, 0.34);
-  --theme-surface: #e4efec;
-  --theme-surface-strong: #f4fbf9;
-  --theme-border: rgba(88, 136, 129, 0.22);
-  --theme-shadow: rgba(44, 83, 79, 0.15);
-  --theme-text: #224440;
-  --theme-muted: #5c7d78;
-  --theme-accent: #3e827b;
-  --theme-accent-strong: #5d7f89;
-  --theme-accent-contrast: #f7fcfb;
-  --theme-input: rgba(248, 253, 252, 0.9);
-  --theme-input-border: rgba(156, 186, 180, 0.74);
-  --theme-input-focus: rgba(62, 130, 123, 0.2);
-  --theme-summary: rgba(235, 245, 242, 0.92);
-  --theme-summary-border: rgba(93, 127, 137, 0.28);
-  --theme-task: rgba(255, 255, 255, 0.88);
-  --theme-task-border: rgba(145, 177, 171, 0.24);
-  --theme-success-bg: #d9ece4;
-  --theme-success-text: #2d6257;
-  --theme-danger-bg: #ece2db;
-  --theme-danger-text: #87614d;
-
-  --page-bg: #e4efec;
-  --page-bg-gradient: linear-gradient(180deg, #eef7f4 0%, #e4efec 52%, #d8e8e4 100%);
-  --page-glow: rgba(122, 174, 167, 0.18);
-}
-
-/* ─── Winter Green – Dark ─── */
-[data-theme='winter-green'][data-color-scheme='dark'] {
-  --theme-glow: rgba(62, 130, 123, 0.18);
-  --theme-surface: #141e1c;
-  --theme-surface-strong: #1a2826;
-  --theme-border: rgba(88, 136, 129, 0.2);
-  --theme-shadow: rgba(0, 0, 0, 0.35);
-  --theme-text: #c8ddd8;
-  --theme-muted: #7aa89f;
-  --theme-accent: #5dbcb1;
-  --theme-accent-strong: #7aacb8;
-  --theme-accent-contrast: #0e1816;
-  --theme-input: rgba(20, 34, 32, 0.88);
-  --theme-input-border: rgba(88, 136, 129, 0.38);
-  --theme-input-focus: rgba(93, 188, 177, 0.24);
-  --theme-summary: rgba(22, 36, 34, 0.88);
-  --theme-summary-border: rgba(62, 130, 123, 0.22);
-  --theme-task: rgba(24, 40, 38, 0.72);
-  --theme-task-border: rgba(88, 136, 129, 0.2);
-  --theme-success-bg: rgba(30, 74, 62, 0.48);
-  --theme-success-text: #72c8a6;
-  --theme-danger-bg: rgba(100, 56, 36, 0.38);
-  --theme-danger-text: #dca088;
-
-  --page-bg: #0f1614;
-  --page-bg-gradient: linear-gradient(180deg, #152220 0%, #0f1614 52%, #0b1210 100%);
-  --page-glow: rgba(62, 130, 123, 0.08);
+  --page-bg: #2a333b;
+  --page-bg-gradient: linear-gradient(180deg, #35414a 0%, #2a333b 54%, #242c33 100%);
+  --page-glow: rgba(156, 176, 176, 0.1);
 }

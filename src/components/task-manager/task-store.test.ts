@@ -100,9 +100,9 @@ test('subscribeToTaskStore reacts when another tab clears localStorage', () => {
 })
 
 /**
- * Verifies the task manager source defines the dual-theme system with settings panel.
+ * Verifies the task manager source defines the single-theme appearance controls.
  */
-test('task manager includes dual-theme system with settings panel', () => {
+test('task manager includes Cloud Dancer appearance controls with system sync', () => {
   const taskManagerSource = readFileSync(
     new URL('./task-manager.tsx', import.meta.url),
     'utf8',
@@ -112,10 +112,13 @@ test('task manager includes dual-theme system with settings panel', () => {
     'utf8',
   )
 
-  assert.match(taskManagerSource, /Cloud Dancer/)
-  assert.match(taskManagerSource, /Winter Green/)
+  assert.match(taskManagerSource, /Cloud Dancer Light/)
+  assert.match(taskManagerSource, /Cloud Dancer Dark/)
+  assert.match(taskManagerSource, /Sync with system/)
+  assert.doesNotMatch(taskManagerSource, /Winter Green/)
   assert.match(taskManagerSource, /settingsOpen/)
   assert.match(taskManagerSource, /SettingsPanel/)
   assert.match(taskManagerStyles, /\.settingsPanel/)
   assert.match(taskManagerStyles, /\.settingsOverlay/)
+  assert.match(taskManagerStyles, /\.toggleButton/)
 })

@@ -3,8 +3,10 @@
 import { useEffect, useLayoutEffect, useSyncExternalStore } from 'react'
 
 import {
-  type ColorScheme,
-  type ThemeId,
+  applyManualModeSelection,
+  applySyncPreference,
+  applySystemModeChange,
+  type ManualMode,
   type ThemePreference,
   getServerThemeSnapshot,
   getThemeSnapshot,
@@ -22,25 +24,18 @@ const useIsomorphicLayoutEffect =
   typeof window !== 'undefined' ? useLayoutEffect : useEffect
 
 /**
- * Resolves the effective mode ('light' | 'dark') from the preference
- * and the current system media query.
+ * Reads the current system light/dark mode from the browser media query.
  */
-function resolveEffectiveMode(
-  colorScheme: ColorScheme,
-  systemPrefersDark: boolean,
-): 'light' | 'dark' {
-  if (colorScheme === 'system') {
-    return systemPrefersDark ? 'dark' : 'light'
-  }
-  return colorScheme
+function getSystemMode(systemPrefersDark: boolean): ManualMode {
+  return systemPrefersDark ? 'dark' : 'light'
 }
 
 /**
- * Applies data attributes to the <html> element so CSS variables activate.
+ * Applies the fixed Cloud Dancer theme and current color mode to the document.
  */
-function applyThemeToDocument(themeId: ThemeId, mode: 'light' | 'dark') {
+function applyThemeToDocument(mode: 'light' | 'dark') {
   const root = document.documentElement
-  root.setAttribute('data-theme', themeId)
+  root.setAttribute('data-theme', 'cloud-dancer')
   root.setAttribute('data-color-scheme', mode)
 }
 
@@ -55,18 +50,38 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   )
 
   useIsomorphicLayoutEffect(() => {
-    const mql = window.matchMedia('(prefers-color-scheme: dark)')
+    applyThemeToDocument(preference.manualMode)
+  }, [preference.manualMode])
 
-    function sync() {
-      const mode = resolveEffectiveMode(preference.colorScheme, mql.matches)
-      applyThemeToDocument(preference.themeId, mode)
+  useEffect(() => {
+    if (!preference.syncWithSystem) {
+      return
     }
 
-    sync()
-    mql.addEventListener('change', sync)
+    const mql = window.matchMedia('(prefers-color-scheme: dark)')
 
-    return () => mql.removeEventListener('change', sync)
-  }, [preference])
+    function syncToSystem(systemPrefersDark: boolean) {
+      const nextPreference = applySystemModeChange(
+        getThemeSnapshot(),
+        getSystemMode(systemPrefersDark),
+      )
+
+      if (nextPreference !== getThemeSnapshot()) {
+        saveThemePreference(nextPreference)
+      }
+    }
+
+    function handleChange(event: MediaQueryListEvent) {
+      syncToSystem(event.matches)
+    }
+
+    syncToSystem(mql.matches)
+    mql.addEventListener('change', handleChange)
+
+    return () => {
+      mql.removeEventListener('change', handleChange)
+    }
+  }, [preference.syncWithSystem])
 
   return <>{children}</>
 }
@@ -81,12 +96,18 @@ export function useTheme() {
     getServerThemeSnapshot,
   )
 
-  function setThemeId(themeId: ThemeId) {
-    saveThemePreference({ ...getThemeSnapshot(), themeId })
+  function setManualMode(manualMode: ManualMode) {
+    saveThemePreference(applyManualModeSelection(getThemeSnapshot(), manualMode))
   }
 
-  function setColorScheme(colorScheme: ColorScheme) {
-    saveThemePreference({ ...getThemeSnapshot(), colorScheme })
+  function setSyncWithSystem(syncWithSystem: boolean) {
+    saveThemePreference(
+      applySyncPreference(
+        getThemeSnapshot(),
+        syncWithSystem,
+        getSystemMode(window.matchMedia('(prefers-color-scheme: dark)').matches),
+      ),
+    )
   }
 
   function setPreference(next: ThemePreference) {
@@ -94,10 +115,10 @@ export function useTheme() {
   }
 
   return {
-    themeId: preference.themeId,
-    colorScheme: preference.colorScheme,
-    setThemeId,
-    setColorScheme,
+    manualMode: preference.manualMode,
+    syncWithSystem: preference.syncWithSystem,
+    setManualMode,
+    setSyncWithSystem,
     setPreference,
   }
 }

@@ -2,6 +2,9 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import {
+  applyManualModeSelection,
+  applySyncPreference,
+  applySystemModeChange,
   getThemeSnapshot,
   subscribeToThemeStore,
 } from './theme-store.ts'
@@ -59,8 +62,8 @@ test('getThemeSnapshot falls back to default for invalid JSON', () => {
   installWindowWithStorage('{invalid-json')
 
   assert.deepEqual(getThemeSnapshot(), {
-    themeId: 'cloud-dancer',
-    colorScheme: 'system',
+    manualMode: 'light',
+    syncWithSystem: true,
   })
 })
 
@@ -70,12 +73,87 @@ test('getThemeSnapshot falls back to default for invalid JSON', () => {
 test('getThemeSnapshot reuses snapshot when storage value is unchanged', () => {
   installWindowWithStorage(
     JSON.stringify({
+      manualMode: 'dark',
+      syncWithSystem: false,
+    }),
+  )
+
+  assert.equal(getThemeSnapshot(), getThemeSnapshot())
+})
+
+/**
+ * Verifies manual mode selection always updates the displayed mode immediately.
+ */
+test('applyManualModeSelection updates the displayed mode without disabling sync', () => {
+  assert.deepEqual(
+    applyManualModeSelection(
+      {
+        manualMode: 'light',
+        syncWithSystem: true,
+      },
+      'dark',
+    ),
+    {
+      manualMode: 'dark',
+      syncWithSystem: true,
+    },
+  )
+})
+
+/**
+ * Verifies enabling sync immediately aligns the displayed mode to the current system mode.
+ */
+test('applySyncPreference aligns the current mode to the system when sync is enabled', () => {
+  assert.deepEqual(
+    applySyncPreference(
+      {
+        manualMode: 'light',
+        syncWithSystem: false,
+      },
+      true,
+      'dark',
+    ),
+    {
+      manualMode: 'dark',
+      syncWithSystem: true,
+    },
+  )
+})
+
+/**
+ * Verifies system changes override the current mode while sync remains enabled.
+ */
+test('applySystemModeChange updates the mode when the system changes under sync', () => {
+  assert.deepEqual(
+    applySystemModeChange(
+      {
+        manualMode: 'light',
+        syncWithSystem: true,
+      },
+      'dark',
+    ),
+    {
+      manualMode: 'dark',
+      syncWithSystem: true,
+    },
+  )
+})
+
+/**
+ * Verifies legacy dual-theme preferences migrate into the single-theme schema.
+ */
+test('getThemeSnapshot migrates legacy theme preferences', () => {
+  installWindowWithStorage(
+    JSON.stringify({
       themeId: 'winter-green',
       colorScheme: 'dark',
     }),
   )
 
-  assert.equal(getThemeSnapshot(), getThemeSnapshot())
+  assert.deepEqual(getThemeSnapshot(), {
+    manualMode: 'dark',
+    syncWithSystem: false,
+  })
 })
 
 /**
@@ -84,8 +162,8 @@ test('getThemeSnapshot reuses snapshot when storage value is unchanged', () => {
 test('subscribeToThemeStore updates snapshot on storage key changes', () => {
   const { dispatchStorage, setStorageValue } = installWindowWithStorage(
     JSON.stringify({
-      themeId: 'cloud-dancer',
-      colorScheme: 'system',
+      manualMode: 'light',
+      syncWithSystem: true,
     }),
   )
 
@@ -93,8 +171,8 @@ test('subscribeToThemeStore updates snapshot on storage key changes', () => {
   const unsubscribe = subscribeToThemeStore(() => { callCount++ })
 
   const updatedRaw = JSON.stringify({
-    themeId: 'winter-green',
-    colorScheme: 'dark',
+    manualMode: 'dark',
+    syncWithSystem: false,
   })
   setStorageValue(updatedRaw)
   dispatchStorage({
@@ -104,8 +182,8 @@ test('subscribeToThemeStore updates snapshot on storage key changes', () => {
 
   assert.equal(callCount, 1, 'subscriber callback should be called once after key update')
   assert.deepEqual(getThemeSnapshot(), {
-    themeId: 'winter-green',
-    colorScheme: 'dark',
+    manualMode: 'dark',
+    syncWithSystem: false,
   })
 
   unsubscribe()
@@ -117,8 +195,8 @@ test('subscribeToThemeStore updates snapshot on storage key changes', () => {
 test('subscribeToThemeStore resets snapshot after localStorage.clear()', () => {
   const { dispatchStorage, setStorageValue } = installWindowWithStorage(
     JSON.stringify({
-      themeId: 'winter-green',
-      colorScheme: 'dark',
+      manualMode: 'dark',
+      syncWithSystem: false,
     }),
   )
 
@@ -134,8 +212,8 @@ test('subscribeToThemeStore resets snapshot after localStorage.clear()', () => {
 
   assert.equal(callCount, 1, 'subscriber callback should be called once after localStorage.clear()')
   assert.deepEqual(getThemeSnapshot(), {
-    themeId: 'cloud-dancer',
-    colorScheme: 'system',
+    manualMode: 'light',
+    syncWithSystem: true,
   })
 
   unsubscribe()

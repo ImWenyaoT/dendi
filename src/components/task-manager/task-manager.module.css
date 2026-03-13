@@ -338,6 +338,78 @@
   font-size: 0.82rem;
 }
 
+.toggleButton {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px;
+  border: 1px solid var(--theme-border);
+  border-radius: 14px;
+  background: var(--theme-task);
+  color: var(--theme-text);
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  transition: border-color 160ms ease, background-color 160ms ease;
+}
+
+.toggleButton:hover {
+  border-color: var(--theme-accent);
+}
+
+.toggleButtonActive {
+  border-color: var(--theme-accent);
+  background: var(--theme-summary);
+  box-shadow: inset 0 0 0 1px var(--theme-accent);
+}
+
+.toggleMeta {
+  display: grid;
+  gap: 4px;
+}
+
+.toggleTitle {
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.toggleHint {
+  color: var(--theme-muted);
+  font-size: 0.82rem;
+}
+
+.switchTrack {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 46px;
+  height: 28px;
+  padding: 3px;
+  border-radius: 999px;
+  flex-shrink: 0;
+  background: color-mix(in srgb, var(--theme-border) 85%, transparent);
+  transition: background-color 160ms ease;
+}
+
+.toggleButtonActive .switchTrack {
+  background: linear-gradient(135deg, var(--theme-accent), var(--theme-accent-strong));
+}
+
+.switchThumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--theme-surface-strong);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  transition: transform 160ms ease, background-color 160ms ease;
+}
+
+.toggleButtonActive .switchThumb {
+  transform: translateX(18px);
+  background: var(--theme-accent-contrast);
+}
+
 /* ─── Responsive ─── */
 
 @media (prefers-reduced-motion: reduce) {
